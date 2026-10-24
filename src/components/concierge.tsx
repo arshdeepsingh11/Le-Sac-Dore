@@ -11,6 +11,7 @@ import { MorphingText } from "./ui/morphing-text";
 import { COLORS, fmt, findProduct, groundFor } from "@/lib/data";
 import { addToBag, cartRows, useShop, useUI } from "@/lib/store";
 import { cn, EASE_LUX } from "@/lib/utils";
+import { track } from "@/lib/analytics";
 
 /* ───────────────────────── Conversation state (survives navigation) ───────────────────────── */
 
@@ -147,12 +148,13 @@ export function Concierge() {
     if (el) el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
   }, [messages]);
 
-  if (pathname.startsWith("/checkout")) return null;
+  if (pathname.startsWith("/checkout") || pathname.startsWith("/admin")) return null;
 
   async function send(text: string) {
     const content = text.trim();
     if (!content || streaming) return;
     setInput("");
+    track("concierge_message", { meta: { text: content.slice(0, 300) } });
     const user: Msg = { id: nextId++, role: "user", content };
     const reply: Msg = { id: nextId++, role: "assistant", content: "" };
     const history = [...useChat.getState().messages, user];
