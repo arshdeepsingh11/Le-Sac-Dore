@@ -17,12 +17,28 @@ const g = globalThis as unknown as { __lsdDb?: DBState };
  * - DATABASE_URL set → any Postgres (Neon, Supabase, RDS…). Use this in production.
  * - Not set → embedded Postgres (PGlite) stored in ./.data — zero-setup local development.
  */
+/**
+ * SSL rule: off for local servers (localhost, 127.0.0.1, ::1, Docker service names without a dot)
+ * or when the URL says sslmode=disable / DATABASE_SSL=false; required for hosted Postgres.
+ */
+function sslFor(url: string): false | "require" {
+  if (process.env.DATABASE_SSL === "false") return false;
+  if (process.env.DATABASE_SSL === "true") return "require";
+  try {
+    const u = new URL(url);
+    if (u.searchParams.get("sslmode") === "disable") return false;
+    const host = u.hostname.replace(/^\[|\]$/g, "");
+    if (host === "localhost" || host === "127.0.0.1" || host === "::1" || !host.includes(".")) return false;
+  } catch {}
+  return "require";
+}
+
 function create(): DBState {
   const url = process.env.DATABASE_URL;
   if (url) {
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     const postgres = require("postgres") as typeof import("postgres");
-    const client = postgres(url, { max: 5, prepare: false, ssl: url.includes("localhost") ? false : "require" });
+    const client = postgres(url, { max: Number(process.env.DATABASE_POOL_MAX) || 5, prepare: false, ssl: sslFor(url), onnotice: () => {} });
     const db = drizzlePg(client, { schema });
     const ready = (async () => {
       await client.unsafe(schema.SCHEMA_SQL).simple();
