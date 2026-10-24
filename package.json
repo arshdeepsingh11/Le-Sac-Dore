@@ -1,0 +1,31 @@
+{
+  "name": "le-sac-dore",
+  "version": "1.0.0",
+  "private": true,
+  "description": "LE SAC DORÉ™ — More than a bag. A premium luxury handbag storefront built with Next.js, TypeScript, Motion and an AI concierge.",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^1.2.0",
+    "clsx": "^2.1.1",
+    "lenis": "^1.3.27",
+    "motion": "^14.6.0",
+    "next": "^16.4.3",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "tailwind-merge": "^3.3.1",
+    "zustand": "^5.0.16"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.3.3",
+    "@types/node": "^22",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "tailwindcss": "^4.3.3",
+    "typescript": "^5"
+  }
+}
