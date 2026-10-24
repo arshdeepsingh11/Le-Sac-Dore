@@ -7,7 +7,7 @@ import { AnimatePresence, motion } from "motion/react";
 
 const COLS: [string, [string, string][]][] = [
   ["SHOP", [["New Arrivals", "/collection?filter=new"], ["Bags", "/collection"], ["Collections", "/collection"], ["Gift Cards", "/services?tab=contact"]]],
-  ["MAISON", [["Our Story", "/maison"], ["L'Atelier", "/atelier"], ["Materials", "/materials"], ["Boutiques", "/services#stores"]]],
+  ["MAISON", [["Our Story", "/maison"], ["Journal", "/journal"], ["L'Atelier", "/atelier"], ["Materials", "/materials"], ["Boutiques", "/services#stores"]]],
   ["CLIENT SERVICES", [["Contact", "/services?tab=contact"], ["Shipping", "/services?tab=shipping"], ["Returns", "/services?tab=returns"], ["Care", "/services?tab=care"], ["Repairs", "/services?tab=repairs"]]],
   ["FOLLOW", [["Instagram", "https://instagram.com"], ["Pinterest", "https://pinterest.com"], ["TikTok", "https://tiktok.com"]]],
 ];
@@ -18,11 +18,17 @@ export function Footer() {
   const [msg, setMsg] = useState("");
   const [err, setErr] = useState(false);
 
-  if (pathname.startsWith("/checkout")) return null;
+  if (pathname.startsWith("/checkout") || pathname.startsWith("/admin")) return null;
 
-  const submit = (e: FormEvent) => {
+  const submit = async (e: FormEvent) => {
     e.preventDefault();
     if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      const r = await fetch("/api/newsletter", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email, source: "footer" }) }).catch(() => null);
+      if (!r?.ok) {
+        setMsg("Something went wrong. Please try again.");
+        setErr(true);
+        return;
+      }
       setMsg("Thank you. You will hear from us soon.");
       setErr(false);
       setEmail("");
@@ -104,7 +110,7 @@ export function Footer() {
         <div className="flex flex-wrap justify-between gap-5 border-t border-cream/15 pt-7 text-[11px] tracking-[.14em] text-cream/60">
           <span>© 2026 LE SAC DORÉ™</span>
           <div className="flex gap-7">
-            <span>Privacy</span>
+            <Link href="/privacy" className="transition-colors hover:text-cream">Privacy</Link>
             <span>Terms</span>
             <span>Accessibility</span>
           </div>
