@@ -104,12 +104,12 @@ export function Spotlight() {
 /* ───────────── La Collection — editorial grid ───────────── */
 
 const FEATURED: [string, string, string][] = [
-  ["le-noir", "wide:col-span-7", "5 / 4"],
-  ["la-bella", "wide:col-span-5", "4 / 5"],
-  ["la-luna", "wide:col-span-5", "4 / 5"],
-  ["l-eclat", "wide:col-span-7", "5 / 4"],
-  ["le-voyage", "wide:col-span-6", "1 / 1"],
-  ["le-rivage", "wide:col-span-6", "1 / 1"],
+  ["le-noir", "md:col-span-6 wide:col-span-4", "4 / 5"],
+  ["la-bella", "md:col-span-6 wide:col-span-4", "4 / 5"],
+  ["la-luna", "md:col-span-6 wide:col-span-4", "4 / 5"],
+  ["l-eclat", "md:col-span-6 wide:col-span-4", "4 / 5"],
+  ["le-voyage", "md:col-span-6 wide:col-span-4", "4 / 5"],
+  ["le-rivage", "md:col-span-6 wide:col-span-4", "4 / 5"],
 ];
 
 export function FeaturedGrid() {
@@ -128,8 +128,8 @@ export function FeaturedGrid() {
       </div>
       <div className="grid grid-cols-12 items-start gap-x-5 gap-y-16">
         {FEATURED.map(([id, span, aspect], i) => (
-          <Reveal key={id} className={`col-span-12 ${span}`} delay={(i % 2) * 0.1} y={36}>
-            <ProductCard product={byId(id)} aspect={aspect} size={42} />
+          <Reveal key={id} className={`col-span-12 ${span}`} delay={(i % 3) * 0.08} y={36}>
+            <ProductCard product={byId(id)} aspect={aspect} size={50} />
           </Reveal>
         ))}
       </div>
@@ -171,7 +171,7 @@ export function NewRail() {
       >
         {PRODUCTS.filter((x) => x.isNew).map((x) => (
           <div key={x.id} className="snap-start">
-            <ProductCard product={x} aspect="3 / 4" size={52} />
+            <ProductCard product={x} aspect="4 / 5" size={52} />
           </div>
         ))}
       </div>
@@ -263,7 +263,7 @@ export function JuteBand() {
         <div className="grid grid-cols-2 gap-5">
           {PRODUCTS.filter((x) => x.mats.includes("jute")).map((x, i) => (
             <Reveal key={x.id} delay={i * 0.1}>
-              <ProductCard product={x} aspect="3 / 4" size={56} />
+              <ProductCard product={x} aspect="4 / 5" size={56} />
             </Reveal>
           ))}
         </div>
