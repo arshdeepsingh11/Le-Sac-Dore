@@ -37,6 +37,15 @@ No setup needed — an embedded Postgres (PGlite) is created in `./.data` on fir
 | Le Concierge (AI) | Streaming chat that recommends pieces as tappable cards (Claude, or an offline catalogue assistant) |
 | **Admin console** `/admin` | KPIs vs previous period, traffic & revenue charts, funnel, live visitors, per-person activity timelines, **Interest** (who returns to which piece — repeat views, wishlist, bag), customers, visitors, products, orders (status → passport), appointments, subscribers, CSV exports |
 
+## PostgreSQL
+
+1. Start Postgres: `docker compose up -d` (or use your installed PostgreSQL / pgAdmin and create a database `lesacdore`).
+2. In `.env.local` set `DATABASE_URL=postgres://lesacdore:lesacdore@localhost:5432/lesacdore`, plus `ADMIN_EMAIL` and `ADMIN_PASSWORD`.
+3. `npm run dev` — the 10 tables are created and your admin account is seeded on first request.
+4. Admin dashboard: sign in at `/login` with the admin email → you land on `/admin`.
+
+Production: create a Neon or Supabase database and put its connection string in Vercel → Environment Variables → `DATABASE_URL`.
+
 ## SEO, AEO & GEO
 
 - **Metadata:** unique title, description, canonical, Open Graph and Twitter card on every page; private pages are `noindex`.

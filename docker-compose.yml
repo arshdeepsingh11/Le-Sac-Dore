@@ -1,0 +1,17 @@
+# Local PostgreSQL for Le Sac Doré.
+# Start:  docker compose up -d
+# Then in .env.local:  DATABASE_URL=postgres://lesacdore:lesacdore@localhost:5432/lesacdore
+services:
+  db:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: lesacdore
+      POSTGRES_PASSWORD: lesacdore
+      POSTGRES_DB: lesacdore
+    ports:
+      - "5432:5432"
+    volumes:
+      - lesacdore-pg:/var/lib/postgresql/data
+volumes:
+  lesacdore-pg:
