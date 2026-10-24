@@ -253,3 +253,45 @@ export function totals(sub: number, ship: "standard" | "express") {
   const tax = Math.round(sub * 0.13);
   return { sub, std, coShip, tax, total: sub + std + tax, coTotal: sub + coShip + tax };
 }
+
+/* ───────────── Artisans & passports ───────────── */
+
+export interface Artisan {
+  id: string;
+  name: string;
+  initials: string;
+  atelier: string;
+  since: number;
+  speciality: string;
+}
+
+export const ARTISANS: Artisan[] = [
+  { id: "em", name: "Élise Moreau", initials: "É.M.", atelier: "Paris atelier", since: 2011, speciality: "Structured silhouettes and hand-painted edges" },
+  { id: "mb", name: "Matteo Bianchi", initials: "M.B.", atelier: "Florence atelier", since: 2008, speciality: "Saddle stitching and full-grain calf" },
+  { id: "cl", name: "Clara Lefèvre", initials: "C.L.", atelier: "Paris atelier", since: 2015, speciality: "Quilting and lambskin" },
+  { id: "jt", name: "Jules Tremblay", initials: "J.T.", atelier: "Montréal atelier", since: 2013, speciality: "Travel pieces and waxed canvas" },
+  { id: "na", name: "Nadia Haddad", initials: "N.H.", atelier: "Paris atelier", since: 2017, speciality: "Jute weaving and leather binding" },
+  { id: "sr", name: "Sofia Rinaldi", initials: "S.R.", atelier: "Florence atelier", since: 2010, speciality: "Final inspection — 42-point check" },
+];
+
+export const artisanById = (id: string) => ARTISANS.find((a) => a.id === id) ?? ARTISANS[0];
+
+/** Hours of handwork per piece (artisan's bench time). */
+export const HOURS: Record<string, number> = {
+  "le-signature": 40, "la-bella": 34, "la-luna": 36, "l-eclat": 30, "le-noir": 46, "le-voyage": 52,
+  "le-rivage": 28, "l-essentiel": 26, "la-vela": 38, "le-zen": 18, "la-nova": 22, "le-grand": 58, "la-dune": 30,
+};
+
+/** Short code used in passport serials, e.g. LSD-SIG-0001. */
+export const SERIAL_CODE: Record<string, string> = {
+  "le-signature": "SIG", "la-bella": "BEL", "la-luna": "LUN", "l-eclat": "ECL", "le-noir": "NOI", "le-voyage": "VOY",
+  "le-rivage": "RIV", "l-essentiel": "ESS", "la-vela": "VEL", "le-zen": "ZEN", "la-nova": "NOV", "le-grand": "GRA", "la-dune": "DUN",
+};
+
+export const sampleSerial = (productId: string) => `LSD-${SERIAL_CODE[productId] ?? "GEN"}-0001`;
+
+/** Parse "W 30 × H 22 × D 12 cm" → { w, h, d } in cm. */
+export function parseDims(dims: string) {
+  const n = dims.match(/\d+(\.\d+)?/g)?.map(Number) ?? [30, 22, 12];
+  return { w: n[0], h: n[1], d: n[2] };
+}
