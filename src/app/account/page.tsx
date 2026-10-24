@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { AccountView, type AccountTab } from "@/components/account-view";
 
-export const metadata: Metadata = { title: "Your account" };
+export const metadata: Metadata = { title: "Your account", robots: { index: false, follow: false } };
 const VALID: AccountTab[] = ["orders", "bags", "appointments", "wish", "info", "prefs"];
 
 export default async function AccountPage({ searchParams }: { searchParams: Promise<{ tab?: string }> }) {
