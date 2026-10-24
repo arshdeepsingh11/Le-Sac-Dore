@@ -21,17 +21,17 @@ function NavLinks() {
   const items: [string, string, boolean][] = [
     ["LA COLLECTION", "/collection", pathname === "/collection" && filter !== "new"],
     ["NEW ARRIVALS", "/collection?filter=new", pathname === "/collection" && filter === "new"],
-    ["BAGS", "/collection", false],
+    ["JOURNAL", "/journal", pathname.startsWith("/journal")],
     ["L'ATELIER", "/atelier", pathname === "/atelier"],
     ["LA MAISON", "/maison", pathname === "/maison"],
   ];
   return (
-    <nav aria-label="Primary" className="hidden gap-[34px] wide:flex">
+    <nav aria-label="Primary" className="hidden gap-[clamp(14px,1.9vw,34px)] min-[1360px]:flex">
       {items.map(([label, href, active]) => (
         <Link
           key={label}
           href={href}
-          className="group relative py-1.5 text-[11px] font-medium tracking-[.2em] whitespace-nowrap"
+          className="group relative py-1.5 text-[11px] font-medium tracking-[clamp(.12em,.16vw,.2em)] whitespace-nowrap"
           aria-current={active ? "page" : undefined}
         >
           {label}
@@ -69,7 +69,7 @@ export function Header() {
   const solid = mode === "solid";
   const ink = mode === "hero-dark" ? "#F7F4EE" : "#111111";
 
-  if (pathname.startsWith("/checkout")) return null;
+  if (pathname.startsWith("/checkout") || pathname.startsWith("/admin")) return null;
 
   return (
     <header
@@ -85,7 +85,7 @@ export function Header() {
         transition: "background .6s ease, color .6s ease, border-color .6s ease, padding .6s cubic-bezier(.2,.7,.2,1)",
       }}
     >
-      <div className="mx-auto grid max-w-[1600px] grid-cols-[auto_1fr_auto] items-center gap-3 wide:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] wide:gap-6">
+      <div className="mx-auto grid max-w-[1600px] grid-cols-[auto_1fr_auto] items-center gap-3 min-[1360px]:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] min-[1360px]:gap-6">
         <Link href="/" aria-label="Le Sac Doré home" className="justify-self-start">
           <Wordmark className="text-[16px] tracking-[.22em] min-[420px]:text-[18px] wide:text-[21px] wide:tracking-[.3em]" />
         </Link>
@@ -93,9 +93,9 @@ export function Header() {
         <Suspense fallback={<span />}>
           <NavLinks />
         </Suspense>
-        <span className="wide:hidden" />
+        <span className="min-[1360px]:hidden" />
 
-        <div className="flex items-center gap-4 justify-self-end text-[10px] font-medium tracking-[.16em] whitespace-nowrap min-[420px]:text-[11px] wide:gap-6 wide:tracking-[.18em]">
+        <div className="flex items-center gap-4 justify-self-end text-[10px] font-medium tracking-[.16em] whitespace-nowrap min-[420px]:text-[11px] wide:gap-[clamp(14px,1.5vw,24px)] wide:tracking-[.18em]">
           <button onClick={() => set({ search: true, menu: false })} className="py-1.5 tracking-[inherit] transition-opacity hover:opacity-60">
             SEARCH
           </button>
@@ -112,7 +112,7 @@ export function Header() {
           >
             BAG (<span key={bagCount} className="inline-block animate-[lsd-in_.5s_ease_both]">{bagCount}</span>)
           </button>
-          <button onClick={() => set({ menu: true })} aria-label="Open menu" className="py-1.5 tracking-[inherit] wide:hidden">
+          <button onClick={() => set({ menu: true })} aria-label="Open menu" className="py-1.5 tracking-[inherit] min-[1360px]:hidden">
             MENU
           </button>
         </div>
