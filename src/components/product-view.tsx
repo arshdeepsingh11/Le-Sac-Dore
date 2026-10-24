@@ -7,7 +7,11 @@ import { AnimatePresence, LayoutGroup, motion } from "motion/react";
 import { BagShot } from "./bag-shot";
 import { ProductCard } from "./product-card";
 import { Reveal } from "./ui/reveal";
-import { COLORS, fmt, groundFor, INSIDE, isLight, MATERIALS, PRODUCTS, VIEWS, type ColorName, type Product, type View } from "@/lib/data";
+import { PatinaPreview } from "./features/patina-preview";
+import { FitChecker } from "./features/fit-checker";
+import { ReserveDialog } from "./features/reserve-dialog";
+import { COLORS, fmt, groundFor, INSIDE, isLight, MATERIALS, PRODUCTS, sampleSerial, VIEWS, type ColorName, type Product, type View } from "@/lib/data";
+import { track } from "@/lib/analytics";
 import { addToBag, toggleWishlist, useShop } from "@/lib/store";
 import { EASE_LUX } from "@/lib/utils";
 
@@ -54,6 +58,11 @@ export function ProductView({ product: p, initialColor }: { product: Product; in
   const wished = useShop((s) => s.wish.includes(p.id));
   const mv = makeView(view, p, color);
   const mat = MATERIALS.find((m) => m.key === p.mats[0]);
+  const [reserve, setReserve] = useState(false);
+
+  useEffect(() => {
+    track("product_view", { productId: p.id, meta: { color: initialColor } });
+  }, [p.id, initialColor]);
 
   const shift = useCallback((d: number) => {
     setView((v) => (v + d + VIEWS.length) % VIEWS.length);
@@ -62,6 +71,7 @@ export function ProductView({ product: p, initialColor }: { product: Product; in
 
   const setColor = (c: ColorName) => {
     setColorState(c);
+    track("color_select", { productId: p.id, meta: { color: c } });
     window.history.replaceState(null, "", `/product/${p.id}?color=${encodeURIComponent(c)}`);
   };
 
@@ -244,7 +254,23 @@ export function ProductView({ product: p, initialColor }: { product: Product; in
               >
                 BUY WITH APPLE PAY
               </button>
+              <button onClick={() => setReserve(true)} className="flex items-center justify-center gap-2 border border-ink/12 bg-transparent px-[30px] py-[19px] text-[11px] font-medium tracking-[.24em] transition-colors duration-300 hover:border-ink">
+                RESERVE IN BOUTIQUE
+              </button>
               <p className="mt-1.5 text-xs leading-relaxed text-taupe">Complimentary signature packaging. Delivered in 2–5 business days.</p>
+              <Link href={`/passport/${sampleSerial(p.id)}`} className="group mt-3 flex items-center gap-4 border-t border-ink/12 pt-5">
+                <span className="flex size-10 shrink-0 items-center justify-center rounded-full border border-gold/60 text-gold">
+                  <svg viewBox="0 0 20 20" className="size-4" fill="none" stroke="currentColor" strokeWidth="1.2" aria-hidden>
+                    <rect x="3" y="2.5" width="14" height="15" rx="1.5" />
+                    <circle cx="10" cy="8.5" r="2.5" />
+                    <path d="M6.5 14h7" strokeLinecap="round" />
+                  </svg>
+                </span>
+                <span className="flex flex-col">
+                  <span className="text-[11px] font-medium tracking-[.2em]">DIGITAL PASSPORT</span>
+                  <span className="text-xs text-taupe">Every bag is signed by its artisan. See a sample →</span>
+                </span>
+              </Link>
             </div>
 
             <div className="mt-10 max-w-[460px] border-b border-ink/15">
@@ -272,6 +298,8 @@ export function ProductView({ product: p, initialColor }: { product: Product; in
           </div>
         </div>
       </section>
+
+      <PatinaPreview product={p} color={color} />
 
       {/* Inside the bag */}
       <section aria-labelledby="h-inside" className="gutter mt-[clamp(100px,14vh,160px)] bg-sand py-[clamp(90px,12vh,140px)]">
@@ -327,6 +355,8 @@ export function ProductView({ product: p, initialColor }: { product: Product; in
           </Reveal>
         </div>
       </section>
+
+      <FitChecker product={p} />
 
       {/* Related */}
       <section aria-labelledby="h-rel" className="gutter mx-auto max-w-[1600px] py-[clamp(100px,14vh,160px)]">
@@ -391,6 +421,7 @@ export function ProductView({ product: p, initialColor }: { product: Product; in
           </motion.div>
         )}
       </AnimatePresence>
+      <ReserveDialog product={p} color={color} open={reserve} onClose={() => setReserve(false)} />
     </>
   );
 }
