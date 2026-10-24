@@ -6,6 +6,7 @@ import { AnimatePresence, motion } from "motion/react";
 import { AnimatedCircularProgressBar } from "../ui/animated-circular-progress-bar";
 import { parseDims, PRODUCTS, type Product } from "@/lib/data";
 import { track } from "@/lib/analytics";
+import { fitRatio, interior } from "@/lib/fit";
 import { cn, EASE_LUX } from "@/lib/utils";
 
 /** Everyday objects, outer dimensions in cm (W × H × D). */
@@ -31,17 +32,6 @@ const ITEMS: { id: string; label: string; group: string; dims: [number, number, 
 ];
 const DEFAULTS = ["iphone", "wallet", "keys", "sunglasses"];
 
-/** Usable interior: walls, lining and the top closure take space. */
-function interior(p: Product) {
-  const { w, h, d } = parseDims(p.dims);
-  return [w * 0.92, h * 0.88, d * 0.85].sort((a, b) => b - a);
-}
-
-/** Does an item fit, allowing any rotation? Returns the tightest ratio. */
-function fitRatio(item: [number, number, number], box: number[]) {
-  const s = [...item].sort((a, b) => b - a);
-  return Math.max(...s.map((v, i) => v / box[i]));
-}
 
 function evaluate(p: Product, ids: string[]) {
   const box = interior(p);
