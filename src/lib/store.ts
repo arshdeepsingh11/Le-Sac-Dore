@@ -3,6 +3,7 @@
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 import { byId, fmt, type ColorName } from "./data";
+import { track } from "./analytics";
 
 /* ───────────────────────── Types ───────────────────────── */
 
@@ -29,6 +30,7 @@ export interface Order {
   eta?: string;
   shipTo?: string;
   items: OrderItem[];
+  passports?: { serial: string; productId: string; color: string }[];
 }
 
 export type FormState = Record<string, string>;
@@ -57,7 +59,7 @@ export const useShop = create<ShopState>()(
   persist(
     (set, get) => ({
       cart: [],
-      wish: ["la-luna", "le-noir"],
+      wish: [],
       orders: [],
       lastOrder: null,
       form: { country: "Canada", province: "Ontario" },
@@ -91,7 +93,10 @@ export const useShop = create<ShopState>()(
       name: "lsd_v1",
       storage: createJSONStorage(() => localStorage),
       skipHydration: true,
-      partialize: (s) => ({ cart: s.cart, wish: s.wish, orders: s.orders, lastOrder: s.lastOrder, form: s.form, prefs: s.prefs }),
+      partialize: (s) => {
+        const { cardName: _a, cardNum: _b, exp: _c, cvc: _d, ...form } = s.form;
+        return { cart: s.cart, wish: s.wish, orders: s.orders, lastOrder: s.lastOrder, form, prefs: s.prefs };
+      },
     },
   ),
 );
@@ -106,6 +111,7 @@ interface UIState {
   toast: string;
   toastOn: boolean;
   hydrated: boolean;
+  signedIn: boolean;
   cardColor: Record<string, ColorName>;
   set: (p: Partial<Omit<UIState, "set" | "flash" | "closeAll" | "setCardColor">>) => void;
   closeAll: () => void;
@@ -123,6 +129,7 @@ export const useUI = create<UIState>()((set) => ({
   toast: "",
   toastOn: false,
   hydrated: false,
+  signedIn: false,
   cardColor: {},
   set: (p) => set(p),
   closeAll: () => set({ drawer: false, search: false, menu: false }),
@@ -142,6 +149,7 @@ export const useSubtotal = () => useShop((s) => s.cart.reduce((a, c) => a + byId
 /** Add to bag — opens the drawer (like the artifact), or toasts when `open` is false. */
 export function addToBag(pid: string, color: ColorName, qty = 1, open = true) {
   useShop.getState().add(pid, color, qty);
+  track("add_to_bag", { productId: pid, meta: { color, qty } });
   if (open) useUI.getState().set({ drawer: true, menu: false, search: false });
   else useUI.getState().flash(`${byId(pid).name} ADDED TO YOUR BAG`);
 }
@@ -149,6 +157,10 @@ export function addToBag(pid: string, color: ColorName, qty = 1, open = true) {
 export function toggleWishlist(pid: string) {
   const saved = useShop.getState().toggleWish(pid);
   useUI.getState().flash(saved ? "SAVED TO WISHLIST" : "REMOVED FROM WISHLIST");
+  track(saved ? "wishlist_add" : "wishlist_remove", { productId: pid });
+  if (useUI.getState().signedIn) {
+    fetch("/api/wishlist", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ productId: pid, on: saved }) }).catch(() => {});
+  }
 }
 
 export function cartRows(cart: CartLine[]) {
