@@ -6,6 +6,7 @@ import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 import { BagDrawer, MobileMenu, SearchOverlay, Toast } from "@/components/overlays";
 import { Concierge } from "@/components/concierge";
+import { AnalyticsTracker } from "@/components/analytics-tracker";
 
 const cormorant = localFont({
   src: [
@@ -55,6 +56,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <BagDrawer />
           <Concierge />
           <Toast />
+          <AnalyticsTracker />
         </Providers>
       </body>
     </html>
