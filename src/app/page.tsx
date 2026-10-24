@@ -4,6 +4,10 @@ import { Hero } from "@/components/home/hero";
 import { AtelierSplit, FeaturedGrid, JuteBand, MaterialsTiles, NewRail, Spotlight, Statement } from "@/components/home/sections";
 import { Reveal } from "@/components/ui/reveal";
 import { PACKAGING } from "@/lib/data";
+import type { Metadata } from "next";
+import { SITE } from "@/lib/seo";
+
+export const metadata: Metadata = { alternates: { canonical: SITE.url } };
 
 export default function Home() {
   return (
