@@ -2,8 +2,9 @@ import type { Metadata } from "next";
 import { BagShot } from "@/components/bag-shot";
 import { Reveal } from "@/components/ui/reveal";
 import { pad2, PILLARS, PRACTICES } from "@/lib/data";
+import { pageMeta } from "@/lib/seo";
 
-export const metadata: Metadata = { title: "La Maison" };
+export const metadata: Metadata = pageMeta({ title: "La Maison — Our Story & Responsibility", description: "Le Sac Doré makes bags well enough to be carried for decades: fewer designs, Leather Working Group tanneries, repairs for life, FSC packaging and no plastic in the box.", path: "/maison" });
 
 export default function MaisonPage() {
   return (

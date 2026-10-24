@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { ResetConsent } from "@/components/reset-consent";
+import { pageMeta } from "@/lib/seo";
 
-export const metadata: Metadata = { title: "Privacy policy" };
+export const metadata: Metadata = pageMeta({ title: "Privacy Policy", description: "What Le Sac Doré collects, why, and the choices you have — stated plainly.", path: "/privacy" });
 
 const SECTIONS: [string, string[]][] = [
   ["WHAT WE COLLECT", [

@@ -7,6 +7,8 @@ import { ReadingProgress } from "@/components/reading-progress";
 import { Reveal } from "@/components/ui/reveal";
 import { byId } from "@/lib/data";
 import { ARTICLES, articleBySlug, fmtJournalDate, type Block } from "@/lib/journal";
+import { JsonLd } from "@/components/json-ld";
+import { abs, articleLd, breadcrumbLd, pageMeta } from "@/lib/seo";
 
 export function generateStaticParams() {
   return ARTICLES.map((a) => ({ slug: a.slug }));
@@ -14,7 +16,9 @@ export function generateStaticParams() {
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const a = articleBySlug((await params).slug);
-  return a ? { title: a.title, description: a.dek, openGraph: { title: a.title, description: a.dek, type: "article" } } : { title: "Not found" };
+  if (!a) return { title: "Not found", robots: { index: false } };
+  const m = pageMeta({ title: a.title, description: a.dek, path: `/journal/${a.slug}`, image: abs(`/journal/${a.slug}/opengraph-image`), type: "article" });
+  return { ...m, openGraph: { ...m.openGraph, type: "article", publishedTime: a.date, section: a.category, authors: [a.author] } };
 }
 
 function Render({ b, first }: { b: Block; first: boolean }) {
@@ -67,6 +71,7 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
 
   return (
     <article>
+      <JsonLd data={[articleLd(a), breadcrumbLd([["Home", "/"], ["The Journal", "/journal"], [a.title, `/journal/${a.slug}`]])]} />
       <ReadingProgress slug={a.slug} />
       <header className="gutter mx-auto max-w-[1000px] pt-[clamp(120px,18vh,180px)] text-center">
         <Link href="/journal" className="text-[10px] tracking-[.26em] text-taupe transition-colors hover:text-ink">
