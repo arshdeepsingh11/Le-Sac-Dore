@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { useLenis } from "lenis/react";
 import { BagShot } from "./bag-shot";
@@ -11,6 +11,8 @@ import { NumberTicker } from "./ui/number-ticker";
 import { COLORS, COUNTRIES, fmt, groundFor, PROVINCES, totals } from "@/lib/data";
 import { cartRows, useShop, useSubtotal, useUI, type Order } from "@/lib/store";
 import { cn, EASE_LUX } from "@/lib/utils";
+import { track } from "@/lib/analytics";
+import { postJSON, useAuth } from "@/lib/auth-store";
 
 type Pay = "card" | "apple" | "google" | "shop";
 const PAY_NAMES: Record<Pay, string> = { card: "Credit card", apple: "Apple Pay", google: "Google Pay", shop: "Shop Pay" };
@@ -125,7 +127,22 @@ export function CheckoutFlow({ initialPay }: { initialPay: Pay }) {
   const [pay, setPay] = useState<Pay>(initialPay);
   const [sumOpen, setSumOpen] = useState(false);
   const [placing, setPlacing] = useState(false);
+  const [card, setCard] = useState<Record<string, string>>({}); // card details live in memory only — never persisted
+  const user = useAuth((s) => s.user);
   const t = totals(sub, ship);
+  const CARD_KEYS = ["cardName", "cardNum", "exp", "cvc"];
+
+  useEffect(() => {
+    track("checkout_start", { meta: { items: cart.length } });
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Prefill from the signed-in account.
+  useEffect(() => {
+    if (!user) return;
+    const [first, ...rest] = user.name.split(" ");
+    const pre: Record<string, string | undefined> = { email: user.email, first, last: rest.join(" "), phone: user.phone ?? undefined, ...(user.address ?? {}) };
+    for (const [k, v] of Object.entries(pre)) if (v && !useShop.getState().form[k]) setForm(k, v);
+  }, [user, setForm]);
   const rows = cartRows(cart);
 
   const top = () => (lenis ? lenis.scrollTo(0, { immediate: true }) : window.scrollTo(0, 0));
@@ -135,7 +152,8 @@ export function CheckoutFlow({ initialPay }: { initialPay: Pay }) {
     top();
   };
   const update = (k: string, v: string) => {
-    setForm(k, v);
+    if (CARD_KEYS.includes(k)) setCard((c) => ({ ...c, [k]: v }));
+    else setForm(k, v);
     if (errors[k]) setErrors(({ [k]: _drop, ...rest }) => rest);
   };
   const shipTo = [`${form.first || ""} ${form.last || ""}`.trim(), form.address, [form.city, form.province, form.postal].filter(Boolean).join(", ")].filter(Boolean).join(", ");
@@ -149,25 +167,25 @@ export function CheckoutFlow({ initialPay }: { initialPay: Pay }) {
     } else go(1);
   };
 
-  const submitOrder = () => {
-    const er = validatePay(form, pay);
+  const submitOrder = async () => {
+    const er = validatePay(card, pay);
     if (Object.keys(er).length) return setErrors(er);
     setPlacing(true);
-    const d = (n: number) => new Date(Date.now() + n * 864e5).toLocaleDateString("en-CA", { weekday: "long", day: "numeric", month: "long" });
-    const order: Order = {
-      number: "LSD-" + String(Math.floor(200000 + Math.random() * 799999)),
-      date: new Date().toLocaleDateString("en-CA", { day: "numeric", month: "long", year: "numeric" }),
-      status: 0,
-      total: t.coTotal,
-      email: form.email,
-      eta: `${d(3)} – ${d(6)}`,
-      shipTo,
-      items: rows.map((c) => ({ name: c.name, color: c.color, qty: c.qty, lineF: c.lineF })),
-    };
-    setTimeout(() => {
-      placeOrder(order);
-      router.push("/confirmation");
-    }, 700);
+    const { ok, data } = await postJSON<{ order: Order }>("/api/orders", {
+      lines: cart.map((c) => ({ pid: c.pid, color: c.color, qty: c.qty })),
+      form: { email: form.email, phone: form.phone, first: form.first, last: form.last, address: form.address, city: form.city, province: form.province, postal: form.postal, country: form.country },
+      ship,
+      pay,
+    });
+    if (!ok) {
+      setPlacing(false);
+      flash((data.error ?? "We couldn't place your order").toUpperCase());
+      return;
+    }
+    setCard({});
+    placeOrder(data.order);
+    if (user) useAuth.getState().refresh();
+    router.push("/confirmation");
   };
 
   const summaryRows = (
@@ -338,7 +356,7 @@ export function CheckoutFlow({ initialPay }: { initialPay: Pay }) {
                         <motion.div key="card" initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} transition={{ duration: 0.4, ease: EASE_LUX }} className="overflow-hidden">
                           <div className="mt-8 grid grid-cols-2 gap-x-6 gap-y-[26px]">
                             {CARD_FIELDS.map((f) => (
-                              <Field key={f.key} def={f} value={form[f.key] || ""} error={errors[f.key]} onChange={(v) => update(f.key, v)} />
+                              <Field key={f.key} def={f} value={card[f.key] || ""} error={errors[f.key]} onChange={(v) => update(f.key, v)} />
                             ))}
                           </div>
                         </motion.div>
