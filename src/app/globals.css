@@ -1,0 +1,300 @@
+@import "tailwindcss";
+
+/* ───────────────────────── Design tokens (exact artifact palette) ───────────────────────── */
+@theme {
+  --breakpoint-wide: 62.5rem; /* 1000px — the artifact's wide/narrow switch */
+
+  --font-serif: var(--font-cormorant), "Cormorant Garamond", Georgia, serif;
+  --font-sans: var(--font-manrope), "Manrope", -apple-system, BlinkMacSystemFont, sans-serif;
+
+  --color-cream: #f7f4ee; /* page background */
+  --color-ivory: #fcfbf8; /* cards, panels */
+  --color-ink: #111111; /* primary text */
+  --color-espresso: #291a13; /* accents, dark sections */
+  --color-cocoa: #3b2519;
+  --color-burgundy: #541f27; /* hover, errors */
+  --color-gold: #c6a66a; /* champagne gold */
+  --color-champagne: #e9ddc4;
+  --color-taupe: #857b70; /* secondary text */
+  --color-body: #3a332d; /* paragraph text */
+  --color-sand: #efe9df;
+  --color-linen: #e9e1d3;
+  --color-parch: #e6ded2; /* image grounds */
+  --color-olive: #424a38;
+  --color-sage: #d9cfa9;
+  --color-night: #1a120d; /* footer */
+  --color-blush: #e3a6ae;
+
+  --ease-lux: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --ease-apple: cubic-bezier(0.25, 0.1, 0.25, 1);
+
+  --animate-lsd-in: lsd-in 1.2s var(--ease-lux) both;
+  --animate-shimmer: shimmer 3.2s linear infinite;
+
+  @keyframes lsd-in {
+    from { opacity: 0; transform: translateY(14px); }
+    to { opacity: 1; transform: none; }
+  }
+  @keyframes shimmer {
+    to { transform: rotate(360deg); }
+  }
+}
+
+/* ───────────────────────── Base ───────────────────────── */
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+  html.lenis,
+  html.lenis body {
+    height: auto;
+  }
+  .lenis.lenis-smooth {
+    scroll-behavior: auto !important;
+  }
+  .lenis.lenis-stopped {
+    overflow: clip;
+  }
+  body {
+    margin: 0;
+    background: var(--color-cream);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+  button {
+    font-family: inherit;
+    cursor: pointer;
+    color: inherit;
+    background: none;
+    border: 0;
+    padding: 0;
+  }
+  input,
+  select,
+  textarea {
+    font-family: inherit;
+  }
+  :focus-visible {
+    outline: 1px solid var(--color-gold);
+    outline-offset: 3px;
+  }
+  ::selection {
+    background: var(--color-champagne);
+    color: var(--color-ink);
+  }
+  sup {
+    line-height: 0;
+  }
+  input[type="search"]::-webkit-search-cancel-button,
+  input[type="search"]::-webkit-search-decoration {
+    -webkit-appearance: none;
+    appearance: none;
+  }
+}
+
+/* ───────────────────────── Components (recurring artifact patterns) ───────────────────────── */
+@layer components {
+  .gutter {
+    padding-left: clamp(20px, 4vw, 56px);
+    padding-right: clamp(20px, 4vw, 56px);
+  }
+  .eyebrow {
+    margin: 0;
+    font-size: 11px;
+    letter-spacing: 0.3em;
+    font-weight: 500;
+    color: var(--color-taupe);
+  }
+  .display {
+    margin: 0;
+    font-family: var(--font-serif);
+    font-weight: 300;
+  }
+  .lede {
+    font-family: var(--font-serif);
+    font-style: italic;
+    color: var(--color-espresso);
+  }
+  .label {
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    color: var(--color-taupe);
+  }
+  .cta {
+    font-size: 11px;
+    letter-spacing: 0.22em;
+    font-weight: 500;
+  }
+
+  /* Solid black button */
+  .btn-ink {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px 34px;
+    background: var(--color-ink);
+    color: var(--color-ivory);
+    border: 1px solid var(--color-ink);
+    font-size: 11px;
+    letter-spacing: 0.24em;
+    font-weight: 500;
+    transition: background 0.4s var(--ease-apple), transform 0.4s var(--ease-lux);
+  }
+  .btn-ink:hover {
+    background: var(--color-espresso);
+  }
+  .btn-ink:active {
+    transform: scale(0.985);
+  }
+
+  /* Outline button (dark text) */
+  .btn-line {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px 34px;
+    background: transparent;
+    color: var(--color-ink);
+    border: 1px solid rgb(17 17 17 / 0.3);
+    font-size: 11px;
+    letter-spacing: 0.24em;
+    font-weight: 500;
+    transition: border-color 0.4s var(--ease-apple), background 0.4s var(--ease-apple), color 0.4s var(--ease-apple), transform 0.4s var(--ease-lux);
+  }
+  .btn-line:hover {
+    border-color: var(--color-ink);
+  }
+  .btn-line:active {
+    transform: scale(0.985);
+  }
+  .btn-line.fill-hover:hover {
+    background: var(--color-ink);
+    color: var(--color-ivory);
+  }
+
+  /* Outline button on dark backgrounds */
+  .btn-light {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 18px 30px;
+    background: transparent;
+    color: var(--color-cream);
+    border: 1px solid var(--color-cream);
+    font-size: 11px;
+    letter-spacing: 0.22em;
+    font-weight: 500;
+    transition: background 0.4s var(--ease-apple), color 0.4s var(--ease-apple);
+  }
+  .btn-light:hover {
+    background: var(--color-cream);
+    color: var(--color-ink);
+  }
+
+  /* Underlined text link with animated rule */
+  .link-rule {
+    position: relative;
+    display: inline-block;
+    padding-bottom: 5px;
+    font-size: 11px;
+    letter-spacing: 0.22em;
+    font-weight: 500;
+    transition: color 0.4s var(--ease-apple);
+  }
+  .link-rule::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 1px;
+    background: currentColor;
+    transform-origin: right;
+    transition: transform 0.6s var(--ease-lux);
+  }
+  .link-rule:hover {
+    color: var(--color-burgundy);
+  }
+  .link-rule:hover::after {
+    animation: rule-sweep 0.7s var(--ease-lux);
+  }
+  .link-rule.on-dark:hover {
+    color: var(--color-gold);
+  }
+
+  /* Underlined field */
+  .field {
+    width: 100%;
+    background: transparent;
+    border: 0;
+    border-bottom: 1px solid rgb(17 17 17 / 0.28);
+    border-radius: 0;
+    padding: 12px 0;
+    font-size: 15px;
+    color: var(--color-ink);
+    outline: none;
+    transition: border-color 0.3s var(--ease-apple);
+    appearance: none;
+  }
+  .field:focus {
+    border-bottom-color: var(--color-ink);
+  }
+  .field[aria-invalid="true"] {
+    border-bottom-color: var(--color-burgundy);
+  }
+  select.field {
+    background-image: linear-gradient(45deg, transparent 50%, var(--color-ink) 50%), linear-gradient(135deg, var(--color-ink) 50%, transparent 50%);
+    background-position: calc(100% - 9px) 52%, calc(100% - 4px) 52%;
+    background-size: 5px 5px;
+    background-repeat: no-repeat;
+    padding-right: 20px;
+  }
+
+  .qty-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgb(17 17 17 / 0.2);
+    font-size: 14px;
+    transition: border-color 0.3s var(--ease-apple), background 0.3s var(--ease-apple);
+  }
+  .qty-btn:hover {
+    border-color: var(--color-ink);
+  }
+
+  .no-scrollbar {
+    scrollbar-width: none;
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .sr-only-focusable:not(:focus) {
+    position: absolute;
+    left: -9999px;
+  }
+}
+
+@keyframes rule-sweep {
+  0% { transform: scaleX(1); transform-origin: right; }
+  45% { transform: scaleX(0); transform-origin: right; }
+  46% { transform: scaleX(0); transform-origin: left; }
+  100% { transform: scaleX(1); transform-origin: left; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition: none !important;
+    animation: none !important;
+    scroll-behavior: auto !important;
+  }
+}
