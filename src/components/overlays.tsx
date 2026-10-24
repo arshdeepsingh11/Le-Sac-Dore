@@ -12,6 +12,7 @@ import { AnimatedCircularProgressBar } from "./ui/animated-circular-progress-bar
 import { COLORS, fmt, groundFor, searchProducts, SEARCH_SUGGESTIONS } from "@/lib/data";
 import { cartRows, useBagCount, useShop, useSubtotal, useUI } from "@/lib/store";
 import { EASE_LUX } from "@/lib/utils";
+import { track } from "@/lib/analytics";
 
 /* ───────────────────────── Search ───────────────────────── */
 
@@ -22,6 +23,13 @@ export function SearchOverlay() {
   const input = useRef<HTMLInputElement>(null);
   const results = searchProducts(q);
   const hasQ = q.trim().length > 0;
+
+  useEffect(() => {
+    const q2 = q.trim();
+    if (q2.length < 2) return;
+    const t = setTimeout(() => track("search", { meta: { q: q2, results: searchProducts(q2).length } }), 1200);
+    return () => clearTimeout(t);
+  }, [q]);
 
   useEffect(() => {
     if (open) {
@@ -116,6 +124,7 @@ export function MobileMenu() {
     ["New Arrivals", "/collection?filter=new"],
     ["L'Atelier", "/atelier"],
     ["Materials", "/materials"],
+    ["Journal", "/journal"],
     ["La Maison", "/maison"],
     [`Wishlist (${wishCount})`, "/wishlist"],
     ["Account", "/account"],
