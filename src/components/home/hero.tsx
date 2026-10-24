@@ -14,6 +14,7 @@ export function Hero() {
   const { scrollY } = useScroll();
   const vh = useMotionValue(900);
   const wideX = useMotionValue(12); // vw offset of the bag on wide screens
+  const endShift = useMotionValue(6); // vh: settle lower on wide screens, rise on phones
   const [textPE, setTextPE] = useState(true);
   const [endPE, setEndPE] = useState(false);
 
@@ -21,11 +22,12 @@ export function Hero() {
     const on = () => {
       vh.set(window.innerHeight);
       wideX.set(window.innerWidth >= 1000 ? 12 : 0);
+      endShift.set(window.innerWidth >= 1000 ? 6 : -9);
     };
     on();
     window.addEventListener("resize", on);
     return () => window.removeEventListener("resize", on);
-  }, [vh, wideX]);
+  }, [vh, wideX, endShift]);
 
   const hp = useTransform(() => scrollY.get() / (vh.get() * 1.4));
   const darkOp = useTransform(hp, (p) => clamp01(1 - (p - 0.3) / 0.35));
@@ -35,7 +37,8 @@ export function Hero() {
   const endY = useTransform(endOp, (o) => (1 - o) * 24);
   const k = useTransform(hp, (p) => clamp01(p / 0.8));
   const bagX = useTransform(() => (1 - k.get()) * wideX.get());
-  const bagY = useTransform(k, (v) => -v * 3);
+  // Lifts off the pedestal, then settles lower for the end card so the handle never meets the headline.
+  const bagY = useTransform(() => -k.get() * 3 + endOp.get() * endShift.get());
   const bagS = useTransform(hp, (p) => 1 + 0.06 * clamp01(p / 0.3) - 0.2 * clamp01((p - 0.3) / 0.5));
   const bagT = useMotionTemplate`translate3d(${bagX}vw, ${bagY}vh, 0) scale(${bagS})`;
 
@@ -72,7 +75,7 @@ export function Hero() {
             />
           </motion.div>
           <div className="absolute inset-x-0 bottom-[10vh] flex justify-center wide:bottom-[27vh]">
-            <div className="relative aspect-[1.18/1] w-[clamp(170px,34vw,280px)] wide:w-[clamp(200px,29vw,440px)]">
+            <div className="relative aspect-[1.18/1] w-[clamp(150px,min(34vw,30vh),280px)] wide:w-[clamp(200px,min(29vw,40vh),440px)]">
               <div className="absolute -inset-x-[16%] -bottom-[7%] h-[15%]" style={{ background: "radial-gradient(ellipse at center, rgba(0,0,0,.5), transparent 70%)" }} />
               <div className="absolute top-[-38%] left-1/4 h-[44%] w-1/2 rounded-t-full border-[4px] border-b-0 border-solid border-[#2E1C13]" />
               <div
