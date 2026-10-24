@@ -37,6 +37,14 @@ No setup needed — an embedded Postgres (PGlite) is created in `./.data` on fir
 | Le Concierge (AI) | Streaming chat that recommends pieces as tappable cards (Claude, or an offline catalogue assistant) |
 | **Admin console** `/admin` | KPIs vs previous period, traffic & revenue charts, funnel, live visitors, per-person activity timelines, **Interest** (who returns to which piece — repeat views, wishlist, bag), customers, visitors, products, orders (status → passport), appointments, subscribers, CSV exports |
 
+## SEO, AEO & GEO
+
+- **Metadata:** unique title, description, canonical, Open Graph and Twitter card on every page; private pages are `noindex`.
+- **Structured data (JSON-LD):** Organization, WebSite + SearchAction, ProductGroup + Offer (shipping, returns), BreadcrumbList, FAQPage, BlogPosting, ItemList, Store ×6, HowTo.
+- **Generated:** `/sitemap.xml`, `/robots.txt`, `/manifest.webmanifest`, icons, OG images per page/product/article.
+- **AI engines:** `/llms.txt` and `/llms-full.txt`; AI crawlers allowed in robots; visible "At a glance" facts + FAQ on product pages.
+- **Go-live:** set `NEXT_PUBLIC_SITE_URL`, verify in Google Search Console and Bing Webmaster Tools, submit `/sitemap.xml`.
+
 ## Privacy
 
 Browsing analytics are recorded only after a visitor chooses **Accept all** in the cookie banner. Signed-in browsing is linked to the account; earlier anonymous browsing is attached at sign-up. Admin browsing is never recorded. Card numbers are never stored or sent to the server — connect Stripe for real payments.
