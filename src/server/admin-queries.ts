@@ -9,7 +9,10 @@ async function q<T = Record<string, unknown>>(query: SQL): Promise<T[]> {
 }
 const n = (v: unknown) => Number(v ?? 0);
 
-export const since = (days: number) => new Date(Date.now() - days * 864e5);
+/* Raw SQL params must be ISO strings, not Date objects: postgres-js (real Postgres) rejects Date
+   in sql`` templates, PGlite tolerates it. Postgres casts the ISO text to timestamptz. */
+export const ago = (ms: number) => new Date(Date.now() - ms).toISOString();
+export const since = (days: number) => ago(days * 864e5);
 
 /* ───────────────────────── Overview ───────────────────────── */
 
@@ -38,7 +41,7 @@ export async function overview(days: number) {
            count(*) FILTER (WHERE created_at >= ${prev} AND created_at < ${from} AND role <> 'admin') AS signups_prev,
            count(*) FILTER (WHERE role <> 'admin') AS customers
     FROM users`);
-  const [live] = await q(sql`SELECT count(DISTINCT visitor_id) AS live FROM events WHERE created_at >= ${new Date(Date.now() - 5 * 60e3)}`);
+  const [live] = await q(sql`SELECT count(DISTINCT visitor_id) AS live FROM events WHERE created_at >= ${ago(5 * 60e3)}`);
   const [res] = await q(sql`SELECT count(*) FILTER (WHERE status = 'requested') AS pending, count(*) FILTER (WHERE created_at >= ${from}) AS total FROM reservations`);
   const [subs] = await q(sql`SELECT count(*) AS total, count(*) FILTER (WHERE created_at >= ${from}) AS recent FROM subscribers`);
 
@@ -113,7 +116,7 @@ export type ActivityRow = {
 };
 
 export async function recentActivity(limit = 30, minutes?: number) {
-  const where = minutes ? sql`WHERE e.created_at >= ${new Date(Date.now() - minutes * 60e3)}` : sql``;
+  const where = minutes ? sql`WHERE e.created_at >= ${ago(minutes * 60e3)}` : sql``;
   return q<ActivityRow>(sql`
     SELECT e.id, e.type, e.path, e.product_id, e.meta, e.created_at, e.visitor_id, e.user_id,
            u.name, u.email, v.city, v.country, v.device
@@ -127,11 +130,11 @@ export async function recentActivity(limit = 30, minutes?: number) {
 export async function liveVisitors() {
   return q<{ visitor_id: string; name: string | null; city: string | null; country: string | null; device: string | null; path: string; last: string; events: string }>(sql`
     SELECT DISTINCT ON (e.visitor_id) e.visitor_id, u.name, v.city, v.country, v.device, e.path, e.created_at AS last,
-           (SELECT count(*) FROM events x WHERE x.visitor_id = e.visitor_id AND x.created_at >= ${new Date(Date.now() - 30 * 60e3)}) AS events
+           (SELECT count(*) FROM events x WHERE x.visitor_id = e.visitor_id AND x.created_at >= ${ago(30 * 60e3)}) AS events
     FROM events e
     LEFT JOIN visitors v ON v.id = e.visitor_id
     LEFT JOIN users u ON u.id = coalesce(e.user_id, v.user_id)
-    WHERE e.created_at >= ${new Date(Date.now() - 5 * 60e3)} AND e.visitor_id IS NOT NULL
+    WHERE e.created_at >= ${ago(5 * 60e3)} AND e.visitor_id IS NOT NULL
     ORDER BY e.visitor_id, e.created_at DESC`);
 }
 
